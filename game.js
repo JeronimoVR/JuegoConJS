@@ -4,9 +4,11 @@ const btnUp = document.querySelector("#up");
 const btnDown = document.querySelector("#down");
 const btnLeft = document.querySelector("#left");
 const btnRight = document.querySelector("#right");
+const spanLives = document.querySelector("#lives");
 let canvasSize;
 let elementsSize;
 let level = 0;
+let lives = 3;
 
 const playerPosition = {
     x: undefined,
@@ -44,7 +46,6 @@ function startGame() {
     const map = maps[level];
 
     if (!map) {
-        
         gameWin();
         return;
     }
@@ -53,7 +54,9 @@ function startGame() {
     const mapRowCols = mapRows.map((row) => row.trim().split(""));
     console.log({ map, mapRows, mapRowCols });
 
-    enemyPosition=[];   
+    showLives();
+
+    enemyPosition = [];
     game.clearRect(0, 0, canvasSize, canvasSize);
 
     mapRowCols.forEach((row, rowI) => {
@@ -74,7 +77,7 @@ function startGame() {
             } else if (col == "I") {
                 giftPosition.x = posX;
                 giftPosition.y = posY;
-            }else if (col == "X") {
+            } else if (col == "X") {
                 enemyPosition.push({ x: posX, y: posY });
             }
 
@@ -85,36 +88,60 @@ function startGame() {
 }
 
 function movePlayer() {
-
     const colisionX = playerPosition.x.toFixed(3) == giftPosition.x.toFixed(3);
     const colisionY = playerPosition.y.toFixed(3) == giftPosition.y.toFixed(3);
     const giftColision = colisionX && colisionY;
 
     if (giftColision) {
-        levelWin(); 
+        levelWin();
     }
 
-const colisionEnemy = enemyPosition.find((enemy) => {
+    const colisionEnemy = enemyPosition.find((enemy) => {
         const colisionX = enemy.x.toFixed(3) == playerPosition.x.toFixed(3);
         const colisionY = enemy.y.toFixed(3) == playerPosition.y.toFixed(3);
         return colisionX && colisionY;
     });
 
     if (colisionEnemy) {
-        console.log("hubo colision con enemigo");
+        levelFail();
     }
 
     game.fillText(emojis.PLAYER, playerPosition.x, playerPosition.y);
 }
 
-function levelWin(){
+function showLives() {
+    const heartsArray = Array(lives).fill(emojis["HEART"]); // [1,2,3]
+    // console.log(heartsArray);
+
+    spanLives.innerHTML = "";
+    heartsArray.forEach((heart) => spanLives.append(heart));
+}
+
+function levelWin() {
     console.log("Subiste de Nivel");
     level++;
     startGame();
 }
 
-function gameWin(){
-    console.log("Ganaste el juego");}
+function levelFail() {
+    console.log("Chocaste contra un enemigo :(");
+    lives--;
+
+    console.log(lives);
+
+    if (lives <= 0) {
+        level = 0;
+        lives = 3;
+    }
+
+    playerPosition.x = undefined;
+    playerPosition.y = undefined;
+    startGame();
+}
+
+function gameWin() {
+    console.log("Ganaste el juego");
+}
 
 window.addEventListener("keydown", moveBYKeys);
 
@@ -141,29 +168,42 @@ function moveBYKeys(event) {
 }
 
 function moveUp() {
-    console.log("up");
-    if (playerPosition.y - elementsSize < 0) return;
-    playerPosition.y -= elementsSize;
-    startGame();
-}
+    console.log("Me quiero mover hacia arriba");
 
-function moveDown() {
-    console.log("down");
-    if (playerPosition.y + elementsSize > canvasSize) return;
-    playerPosition.y += elementsSize;
-    startGame();
+    if (playerPosition.y - elementsSize ==0) {
+        console.log("OUT");
+    } else {
+        playerPosition.y -= elementsSize;
+        startGame();
+    }
 }
-
 function moveLeft() {
-    console.log("left");
-    if (playerPosition.x - elementsSize < 0) return;
-    playerPosition.x -= elementsSize;
-    startGame();
-}
+    console.log("Me quiero mover hacia izquierda");
 
+    if (playerPosition.x - elementsSize < elementsSize) {
+        console.log("OUT");
+    } else {
+        playerPosition.x -= elementsSize;
+        startGame();
+    }
+}
 function moveRight() {
-    console.log("right");
-    if (playerPosition.x + elementsSize > canvasSize) return;
-    playerPosition.x += elementsSize;
-    startGame();
+    console.log("Me quiero mover hacia derecha");
+
+    if (playerPosition.x + elementsSize > canvasSize) {
+        console.log("OUT");
+    } else {
+        playerPosition.x += elementsSize;
+        startGame();
+    }
+}
+function moveDown() {
+    console.log("Me quiero mover hacia abajo");
+
+    if (playerPosition.y + elementsSize > canvasSize) {
+        console.log("OUT");
+    } else {
+        playerPosition.y += elementsSize;
+        startGame();
+    }
 }
